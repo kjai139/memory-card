@@ -1,23 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
+import { Cards } from './Components/Cards';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className='gameTitleDiv'>
+      <div>
+
+        
+      <p className='gameTitle'>Memory Card Game</p>
+      <p className='subGameTitle'>Get points by selecting cards only once</p>
+      </div>
+      <div>
+        <p>Highest score: 0</p>
+        <p>Scoreboard goes here</p>
+
+      </div>
+      </div>
+      
+      < Cards/>
     </div>
   );
 }
