@@ -47,4 +47,5 @@ html, body {
 
 .cards:hover {
   transform: scale(105%);
+  cursor: pointer;
 }
