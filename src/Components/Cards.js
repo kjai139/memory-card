@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import * as pokemonCards from "./Card"
+import useSound from "use-sound";
+import clickSound from "./sounds/clicksoundeffect.mp3"
+import wrongSound from "./sounds/wrong.mp3"
 
-
-function Cards() {
+function Cards({dataParentToChildren}) {
     
     const [cards, setCards] = useState({
         selection:[
@@ -38,25 +40,86 @@ function Cards() {
         highScore: 0
     })
 
+    const [playbackRate, setplayBackRate] = useState(1)
+
+    const [playClickSound] = useSound(clickSound,
+    {volume: 0.5,
+    playbackRate,
+    
+    })
+
+    const [playWrongSound] = useSound(wrongSound,
+        {
+            volume:0.5,
+            playbackRate
+        })
+
+    const [isGameWon, setGameWon] = useState(false)
+
     const addScore = (index) => {
-        if (cards.alreadySelected.indexOf(index) !== -1) {
 
-        }
-    }
-
-    const shuffleCards = (e) => {
         let shuffledSelection = cards.selection.map(value => ({value, sort: Math.random()}))
         .sort((a,b) => a.sort - b.sort)
         .map(({value}) => value)
 
-        // console.log(shuffledSelection)
-        console.log(e.target.getAttribute('value'))
-        setCards( (prevState) => {
-            return {
-                ...prevState,
-                selection:shuffledSelection
+        let newCurrentScore = cards.currentScore + 1
+
+        if (newCurrentScore == 30) {
+            setGameWon(true)
+        } else {
+            setCards( (prevState) => {
+                return {
+                    ...prevState,
+                    selection:shuffledSelection,
+                    currentScore: newCurrentScore,
+                    alreadySelected: [...cards.alreadySelected, index]
+                }
+            })
+
+        }
+        
+        
+        
+    }
+
+    const shuffleCards = (e) => {
+        let index = e.target.getAttribute('value')
+        let shuffledSelection = cards.selection.map(value => ({value, sort: Math.random()}))
+        .sort((a,b) => a.sort - b.sort)
+        .map(({value}) => value)
+
+        
+
+        if (cards.alreadySelected.indexOf(index) === -1){
+            
+            playClickSound()
+            addScore(index)
+        } else {
+            playWrongSound()
+            let newHighScore = cards.currentScore
+            if (newHighScore > cards.highScore){
+                setCards( (prevState) => {
+                    return {
+                        ...prevState,
+                        selection:shuffledSelection,
+                        currentScore: 0,
+                        alreadySelected: [],
+                        highScore: newHighScore
+
+                    }
+                })
+            } else {
+                setCards( (prevState) => {
+                    return {
+                        ...prevState,
+                        selection:shuffledSelection,
+                        currentScore:0,
+                        alreadySelected:[]
+                    }
+                })
             }
-        })
+            
+        }
     }
 
     const renderCards = () => {
@@ -68,19 +131,53 @@ function Cards() {
         )
     }
 
+    const renderVictory = () => {
+        
+        if (isGameWon == true) {
+            return (
+                <div className='overlay hidden'>
+              <p className='overlayTitle'>Congrats you won!</p>
+              <button className="overlayBtn" onClick={newGame}>New game</button>
+                </div>
+            )
+        } else {
+            return (
+                null
+            )
+        }
+    }
+
+    const newGame = (e) => {
+        setCards( (prevState) => {
+            return {
+                ...prevState,
+                alreadySelected: [],
+                currentScore: 0,
+                highScore: 0
+
+            }
+        })
+        setGameWon(false)
+    }
+    
+    const testWin = () => {
+        setGameWon(true)
+    }
+    
+
 
     return (
     <div className="App">
       <div className='gameTitleDiv'>
         <div>
-
+        {/* <button onClick={testWin}>Win button</button> */}
             
-        <p className='gameTitle'>Memory Card Game</p>
-        <p className='subGameTitle'>Get points by selecting cards only once</p>
+        <p className='gameTitle'>Pokemon Card Memory Game</p>
+        <p className='subGameTitle'>Try to select all the pokemons only once</p>
         </div>
-      <div>
-        <p className="highScoreTxt">Highest score: 0</p>
-        <p className="currentScoreTxt">Current Score: 0</p>
+      <div className="scoreboardDiv">
+        <p className="highScoreTxt">Highest score: {cards.highScore}</p>
+        <p className="currentScoreTxt">Current Score: {cards.currentScore}</p>
 
       </div>
       </div>
@@ -88,6 +185,9 @@ function Cards() {
         <div className="cardGrid">
             {renderCards()}
         </div>
+        {renderVictory()}
+
+        {console.log(dataParentToChildren)}
     </div>
         
     )
